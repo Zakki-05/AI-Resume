@@ -15,12 +15,13 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [collapsed, setCollapsed] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Mock User Data
   const user = {
-    name: 'Alex Johnson',
+    name: 'mohammed zakki adnaan p',
     role: 'Aspiring Full Stack Developer',
-    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&h=150&fit=crop'
+    avatar: '/avatar.jpg'
   };
 
   useEffect(() => {
@@ -35,22 +36,28 @@ function App() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100">
       <Sidebar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={(tab) => {
+          setActiveTab(tab);
+          setMobileMenuOpen(false); // Close mobile menu on tab change
+        }}
         collapsed={collapsed}
         setCollapsed={setCollapsed}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
       />
 
       <main
-        className={`transition-all duration-500 min-h-screen ${collapsed ? 'pl-20' : 'pl-64'
-          }`}
+        className={`transition-all duration-500 min-h-screen ${collapsed ? 'lg:pl-20' : 'lg:pl-64'
+          } pl-0`}
       >
         <Navbar
           darkMode={darkMode}
           setDarkMode={setDarkMode}
           user={user}
+          setMobileMenuOpen={setMobileMenuOpen}
         />
 
-        <div className="p-8 max-w-7xl mx-auto">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}

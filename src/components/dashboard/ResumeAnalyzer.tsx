@@ -160,7 +160,7 @@ const ResumeAnalyzer: React.FC = () => {
                     >
                         {/* Results Grid */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <Card className="lg:col-span-1 flex flex-col items-center justify-center text-center p-10">
+                            <Card className="flex flex-col items-center justify-center text-center p-6 sm:p-10">
                                 <div className="relative w-32 h-32 flex items-center justify-center mb-6">
                                     <svg className="w-full h-full transform -rotate-90">
                                         <circle cx="64" cy="64" r="58" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-slate-100 dark:text-slate-800" />

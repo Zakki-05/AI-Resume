@@ -1,5 +1,4 @@
-import React from 'react';
-import { Bell, Search, Moon, Sun, ChevronDown } from 'lucide-react';
+import { Bell, Search, Moon, Sun, ChevronDown, Menu } from 'lucide-react';
 
 
 interface NavbarProps {
@@ -10,13 +9,22 @@ interface NavbarProps {
         avatar: string;
         role: string;
     };
+    setMobileMenuOpen: (open: boolean) => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ darkMode, setDarkMode, user }) => {
+const Navbar: React.FC<NavbarProps> = ({ darkMode, setDarkMode, user, setMobileMenuOpen }) => {
     return (
-        <header className="h-20 glass-card sticky top-0 z-40 px-8 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
+        <header className="h-20 glass-card sticky top-0 z-40 px-4 sm:px-8 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
+            {/* Mobile Menu Toggle */}
+            <button
+                onClick={() => setMobileMenuOpen(true)}
+                className="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-400 lg:hidden"
+            >
+                <Menu className="w-6 h-6" />
+            </button>
+
             {/* Search Bar */}
-            <div className="relative w-96 hidden md:block">
+            <div className="relative w-96 hidden lg:block">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                 <input
                     type="text"

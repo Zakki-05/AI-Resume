@@ -107,7 +107,7 @@ const PortfolioAnalyzer: React.FC = () => {
                         animate={{ opacity: 1, y: 0 }}
                         className="space-y-6"
                     >
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                             {results.metrics.map((metric: any, i: number) => (
                                 <Card key={i} className="flex flex-col gap-4">
                                     <div className={`p-3 rounded-xl bg-slate-100 dark:bg-slate-800 w-fit ${metric.color}`}>

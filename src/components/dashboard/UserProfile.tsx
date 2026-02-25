@@ -9,7 +9,7 @@ const UserProfile: React.FC = () => {
                 <Card className="w-full md:w-80 shrink-0 text-center p-8">
                     <div className="relative w-32 h-32 mx-auto mb-6">
                         <img
-                            src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&h=200&fit=crop"
+                            src="/avatar.jpg"
                             alt="Profile"
                             className="w-full h-full object-cover rounded-3xl"
                         />
@@ -17,27 +17,37 @@ const UserProfile: React.FC = () => {
                             <Camera className="w-4 h-4" />
                         </button>
                     </div>
-                    <h2 className="text-2xl font-bold font-display">Alex Johnson</h2>
+                    <h2 className="text-2xl font-bold font-display uppercase">mohammed zakki adnaan p</h2>
                     <p className="text-slate-500 text-sm mt-1">Aspiring Full Stack Developer</p>
 
                     <div className="mt-8 space-y-3">
                         <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-sm">
                             <Mail className="w-4 h-4 text-slate-400" />
-                            alex.j@example.com
+                            zakkiadnan05@gmail.com
                         </div>
                         <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-sm">
                             <MapPin className="w-4 h-4 text-slate-400" />
-                            San Francisco, CA
+                            Pernambut, Tamil Nadu, India
                         </div>
                     </div>
 
                     <div className="flex justify-center gap-4 mt-8">
-                        <button className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-slate-600 dark:text-slate-400 hover:text-primary-600 transition-all">
+                        <a
+                            href="https://github.com/Zakki-05"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-slate-600 dark:text-slate-400 hover:text-primary-600 transition-all"
+                        >
                             <Github className="w-5 h-5" />
-                        </button>
-                        <button className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-slate-600 dark:text-slate-400 hover:text-primary-600 transition-all">
+                        </a>
+                        <a
+                            href="https://www.linkedin.com/in/mohammed-zakki-adnan-p"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-slate-600 dark:text-slate-400 hover:text-primary-600 transition-all"
+                        >
                             <Linkedin className="w-5 h-5" />
-                        </button>
+                        </a>
                     </div>
                 </Card>
 
