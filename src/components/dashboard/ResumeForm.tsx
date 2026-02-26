@@ -102,8 +102,27 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ data, updateData, onSave }) => 
     };
 
     return (
-        <div className="space-y-6">
-            {/* Step Indicator */}
+        <Card className="p-6 space-y-8 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl border-slate-200 dark:border-slate-800 shadow-xl no-print">
+            {/* Template Selector */}
+            <div className="space-y-3">
+                <label className="text-xs font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                    <Sparkles className="w-3 h-3 text-primary-500" />
+                    Select Design Template
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                    {(['executive', 'minimalist', 'creative'] as const).map((t) => (
+                        <button
+                            key={t}
+                            onClick={() => updateData({ template: t })}
+                            className={`p-2 py-3 rounded-xl border-2 transition-all font-bold text-xs uppercase tracking-tighter ${data.template === t ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-600' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 text-slate-400'}`}
+                        >
+                            {t}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Step Progress Indicators */}
             <div className="flex justify-between items-center mb-8 px-4">
                 {steps.map((step, index) => {
                     const Icon = step.icon;
@@ -162,7 +181,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ data, updateData, onSave }) => 
                                         value={data.personalInfo.jobTitle}
                                         onChange={handlePersonalInfoChange}
                                         className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary-500 outline-none transition-all"
-                                        placeholder="Senior Frontend Developer"
+                                        placeholder="e.g. Project Manager"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -465,7 +484,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ data, updateData, onSave }) => 
                     </button>
                 )}
             </div>
-        </div>
+        </Card>
     );
 };
 

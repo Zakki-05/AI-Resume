@@ -1,8 +1,16 @@
 import React from 'react';
-import { Mail, Github, Linkedin, MapPin, Award, Download, Camera } from 'lucide-react';
+import { Mail, Globe, Linkedin, MapPin, Award, Download, Camera, LogOut } from 'lucide-react';
 import { Card, Badge } from '../ui';
 
-const UserProfile: React.FC = () => {
+interface UserProfileProps {
+    session: any;
+    onSignOut: () => void;
+}
+
+const UserProfile: React.FC<UserProfileProps> = ({ session, onSignOut }) => {
+    const userEmail = session?.user?.email || 'zakkiadnan05@gmail.com';
+    const userName = session ? userEmail.split('@')[0] : 'mohammed zakki adnaan p';
+
     return (
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row items-start gap-8">
@@ -17,13 +25,13 @@ const UserProfile: React.FC = () => {
                             <Camera className="w-4 h-4" />
                         </button>
                     </div>
-                    <h2 className="text-2xl font-bold font-display uppercase">mohammed zakki adnaan p</h2>
-                    <p className="text-slate-500 text-sm mt-1">Aspiring Full Stack Developer</p>
+                    <h2 className="text-2xl font-bold font-display uppercase">{userName}</h2>
+                    <p className="text-slate-500 text-sm mt-1">{session ? 'Member' : 'Experienced Professional'}</p>
 
                     <div className="mt-8 space-y-3">
                         <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-sm">
                             <Mail className="w-4 h-4 text-slate-400" />
-                            zakkiadnan05@gmail.com
+                            {userEmail}
                         </div>
                         <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-sm">
                             <MapPin className="w-4 h-4 text-slate-400" />
@@ -33,12 +41,12 @@ const UserProfile: React.FC = () => {
 
                     <div className="flex justify-center gap-4 mt-8">
                         <a
-                            href="https://github.com/Zakki-05"
+                            href="#"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-slate-600 dark:text-slate-400 hover:text-primary-600 transition-all"
                         >
-                            <Github className="w-5 h-5" />
+                            <Globe className="w-5 h-5" />
                         </a>
                         <a
                             href="https://www.linkedin.com/in/mohammed-zakki-adnan-p"
@@ -49,6 +57,16 @@ const UserProfile: React.FC = () => {
                             <Linkedin className="w-5 h-5" />
                         </a>
                     </div>
+
+                    {session && (
+                        <button
+                            onClick={onSignOut}
+                            className="mt-8 w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 transition-all font-bold"
+                        >
+                            <LogOut className="w-4 h-4" />
+                            Sign Out
+                        </button>
+                    )}
                 </Card>
 
                 <div className="flex-1 space-y-6">
@@ -81,9 +99,9 @@ const UserProfile: React.FC = () => {
                         <h3 className="text-xl font-bold mb-6">Analysis History & Reports</h3>
                         <div className="space-y-4">
                             {[
-                                { name: 'Senior React Developer Resume', date: 'Feb 24, 2026', type: 'Resume' },
-                                { name: 'Portfolio Review - V2', date: 'Feb 20, 2026', type: 'Portfolio' },
-                                { name: 'Backend Engineer Resume', date: 'Feb 15, 2026', type: 'Resume' },
+                                { name: 'Operations Director Resume', date: 'Feb 24, 2026', type: 'Resume' },
+                                { name: 'Marketing Strategy - V2', date: 'Feb 20, 2026', type: 'Portfolio' },
+                                { name: 'Project Manager Resume', date: 'Feb 15, 2026', type: 'Resume' },
                             ].map((doc, i) => (
                                 <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all group">
                                     <div className="flex items-center gap-4">

@@ -14,6 +14,8 @@ import { Card, Badge } from './components/ui';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileSearch, Sparkles, Briefcase, BarChart3, ChevronRight, PenTool, Plus } from 'lucide-react';
 import type { ResumeData } from './types/resume';
+import { supabase } from './utils/supabaseClient';
+import AuthModal from './components/auth/AuthModal';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -24,12 +26,14 @@ function App() {
   // Mock User Data
   const user = {
     name: 'mohammed zakki adnaan p',
-    role: 'Aspiring Full Stack Developer',
+    role: 'Proven Professional',
     avatar: '/avatar.jpg'
   };
 
   const [resumes, setResumes] = useState<ResumeData[]>([]);
   const [activeResumeId, setActiveResumeId] = useState<string | null>(null);
+  const [session, setSession] = useState<any>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const activeResume = resumes.find(r => r.id === activeResumeId) || null;
 
@@ -38,6 +42,7 @@ function App() {
     const newResume: ResumeData = {
       id: newId,
       updatedAt: new Date().toISOString(),
+      template: 'executive',
       personalInfo: {
         fullName: '', email: '', phone: '', location: '', jobTitle: '', summary: ''
       },
@@ -52,34 +57,148 @@ function App() {
   };
 
   const updateActiveResume = (newData: Partial<ResumeData>) => {
-    setResumes(prev => prev.map(r =>
+    const updatedResumes = resumes.map(r =>
       r.id === activeResumeId
         ? { ...r, ...newData, updatedAt: new Date().toISOString() }
         : r
-    ));
+    );
+    setResumes(updatedResumes);
+
+    // Cloud Sync if logged in
+    if (session && activeResumeId) {
+      const updatedResume = updatedResumes.find(r => r.id === activeResumeId);
+      if (updatedResume) {
+        saveResumeToCloud(updatedResume);
+      }
+    }
+  };
+
+  const saveResumeToCloud = async (resume: ResumeData) => {
+    if (!session) return;
+    try {
+      const { error } = await supabase
+        .from('resumes')
+        .upsert({
+          user_id: session.user.id,
+          resume_id: resume.id,
+          data: resume,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id,resume_id' });
+
+      if (error) throw error;
+      console.log('Synced to cloud');
+    } catch (e) {
+      console.error('Cloud sync failed', e);
+    }
+  };
+
+  const fetchResumesFromCloud = async () => {
+    if (!session) return;
+    try {
+      // 1. Get local resumes
+      const saved = localStorage.getItem('resumes_v2');
+      let localResumes: ResumeData[] = [];
+      if (saved) {
+        try {
+          localResumes = JSON.parse(saved);
+        } catch (e) {
+          console.error('Failed to parse local resumes during bridge', e);
+        }
+      }
+
+      // 2. Fetch cloud resumes
+      const { data, error } = await supabase
+        .from('resumes')
+        .select('data')
+        .eq('user_id', session.user.id);
+
+      if (error) throw error;
+
+      let cloudResumes: ResumeData[] = [];
+      if (data && data.length > 0) {
+        cloudResumes = data.map((item: any) => item.data);
+      }
+
+      // 3. Merge: If a resume exists locally but NOT in cloud, or exists but local is newer
+      const finalResumes = [...cloudResumes];
+      const resumesToPushToCloud: ResumeData[] = [];
+
+      for (const localRes of localResumes) {
+        const cloudIndex = finalResumes.findIndex((cr) => cr.id === localRes.id);
+
+        if (cloudIndex === -1) {
+          // It's a new local draft not in cloud
+          finalResumes.push(localRes);
+          resumesToPushToCloud.push(localRes);
+        } else {
+          // Exists in both, check which is newer (simple compare based on updatedAt or default to cloud if unsure)
+          const localTime = new Date(localRes.updatedAt).getTime();
+          const cloudTime = new Date(finalResumes[cloudIndex].updatedAt).getTime();
+
+          if (localTime > cloudTime) {
+            finalResumes[cloudIndex] = localRes;
+            resumesToPushToCloud.push(localRes);
+          }
+        }
+      }
+
+      // 4. Update State
+      setResumes(finalResumes);
+      if (!activeResumeId && finalResumes.length > 0) {
+        setActiveResumeId(finalResumes[0].id);
+      }
+
+      // 5. Push unsynced local drafts to cloud
+      for (const res of resumesToPushToCloud) {
+        await saveResumeToCloud(res);
+      }
+
+    } catch (e) {
+      console.error('Failed to fetch from cloud', e);
+    }
   };
 
   useEffect(() => {
-    const saved = localStorage.getItem('resumes_v2');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setResumes(parsed);
-        if (parsed.length > 0) setActiveResumeId(parsed[0].id);
-      } catch (e) {
-        console.error('Failed to load resumes', e);
-      }
+    if (session) {
+      fetchResumesFromCloud();
     } else {
-      // Create initial if none
-      createNewResume();
+      const saved = localStorage.getItem('resumes_v2');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setResumes(parsed);
+          if (parsed.length > 0) setActiveResumeId(parsed[0].id);
+        } catch (e) {
+          console.error('Failed to load resumes', e);
+        }
+      } else {
+        createNewResume();
+      }
     }
-  }, []);
+  }, [session]);
 
   useEffect(() => {
     if (resumes.length > 0) {
       localStorage.setItem('resumes_v2', JSON.stringify(resumes));
     }
   }, [resumes]);
+
+  useEffect(() => {
+    if (!supabase) return;
+
+    supabase.auth.getSession().then(({ data: { session } }: any) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+      setSession(session);
+      if (session) setIsAuthModalOpen(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (darkMode) {
@@ -112,6 +231,9 @@ function App() {
           setDarkMode={setDarkMode}
           user={user}
           setMobileMenuOpen={setMobileMenuOpen}
+          session={session}
+          onSignIn={() => setIsAuthModalOpen(true)}
+          onSignOut={() => supabase?.auth?.signOut()}
         />
 
         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
@@ -128,7 +250,7 @@ function App() {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                       <h1 className="text-3xl font-bold font-display tracking-tight">
-                        Welcome back, <span className="gradient-text">{user.name.split(' ')[0]}</span>!
+                        Welcome back, <span className="gradient-text">{session ? session.user.email?.split('@')[0] : user.name.split(' ')[0]}</span>!
                       </h1>
                       <p className="text-slate-500 dark:text-slate-400 mt-1">
                         Here's what's happening with your career progress today.
@@ -261,7 +383,10 @@ function App() {
               )}
 
               {activeTab === 'profile' && (
-                <UserProfile />
+                <UserProfile
+                  session={session}
+                  onSignOut={() => supabase?.auth.signOut()}
+                />
               )}
 
               {activeTab !== 'dashboard' &&
@@ -283,6 +408,11 @@ function App() {
           </AnimatePresence>
         </div>
       </main>
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </div>
   );
 }

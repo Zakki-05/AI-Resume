@@ -31,24 +31,42 @@ export const improveBulletPoint = async (text: string): Promise<string> => {
 };
 
 export const analyzeATS = async (resumeText: string): Promise<any> => {
-    if (!GEMINI_API_KEY) return null;
+    if (!GEMINI_API_KEY) return {
+        score: 85,
+        skills: ['Project Management', 'Team Leadership', 'Strategic Planning'],
+        missingSkills: ['Advanced Analytics', 'Budgeting'],
+        suggestions: ['Quantify your achievements with more metrics.', 'Add a professional certification section.'],
+        radarData: [
+            { subject: 'Leadership', A: 90, fullMark: 100 },
+            { subject: 'Communication', A: 85, fullMark: 100 },
+            { subject: 'Technical', A: 70, fullMark: 100 },
+            { subject: 'Strategy', A: 95, fullMark: 100 },
+            { subject: 'Problem Solving', A: 80, fullMark: 100 },
+            { subject: 'Teamwork', A: 85, fullMark: 100 },
+        ]
+    };
 
     const prompt = `
-    Analyze the following resume text for ATS (Applicant Tracking System) compatibility.
-    Calculate a score (0-100), identify detected skills, missing critical skills for a general tech role, 
-    and provide 3-5 specific improvement suggestions.
-    
-    Resume Text:
-    ${resumeText}
-    
-    Return ONLY a valid JSON object with the following structure:
-    {
-      "score": number,
-      "detectedSkills": string[],
-      "missingSkills": string[],
-      "suggestions": string[]
-    }
-  `;
+      Analyze this resume text and provide a professional ATS feedback report.
+      
+      Return ONLY a JSON object with the following structure:
+      {
+        "score": number (0-100),
+        "skills": ["skill1", "skill2"],
+        "missingSkills": ["missing1", "missing2"],
+        "suggestions": ["suggestion1", "suggestion2"],
+        "radarData": [
+            { "subject": "Leadership", "A": number, "fullMark": 100 },
+            { "subject": "Communication", "A": number, "fullMark": 100 },
+            { "subject": "Technical", "A": number, "fullMark": 100 },
+            { "subject": "Strategy", "A": number, "fullMark": 100 },
+            { "subject": "Problem Solving", "A": number, "fullMark": 100 },
+            { "subject": "Teamwork", "A": number, "fullMark": 100 }
+        ]
+      }
+      
+      Resume text: ${resumeText}
+    `;
 
     try {
         const response = await fetch(GEMINI_URL, {
@@ -71,7 +89,7 @@ export const analyzeATS = async (resumeText: string): Promise<any> => {
 };
 
 export const generateSummary = async (jobTitle: string, skills: string[]): Promise<string> => {
-    if (!GEMINI_API_KEY) return "Professional summary focused on technologies and value delivery.";
+    if (!GEMINI_API_KEY) return "Professional summary focused on key achievements and value delivery.";
 
     const prompt = `
     You are a professional career coach. Write a compelling 2nd-person professional summary for a resume 
@@ -97,16 +115,16 @@ export const generateSummary = async (jobTitle: string, skills: string[]): Promi
         return data.candidates[0].content.parts[0].text.trim();
     } catch (error) {
         console.error('Summary Generation Error:', error);
-        return "Professional summary focused on technologies and value delivery.";
+        return "Professional summary focused on key achievements and value delivery.";
     }
 };
 
 export const analyzeSkillGap = async (skills: string[], targetRole: string): Promise<string[]> => {
-    if (!GEMINI_API_KEY) return ['Docker', 'AWS', 'Kubernetes'];
+    if (!GEMINI_API_KEY) return ['Advanced Communication', 'Project Management', 'Data Analysis'];
 
     const prompt = `
-      Compare the following list of skills with industry standard requirements for a ${targetRole} role.
-      Identify the top 5 missing skills that would make this candidate more competitive.
+      Compare the following list of skills with current industry standard requirements for a "${targetRole}" role.
+      Identify the top 5 missing skills or certifications that would make a candidate in this field more competitive.
       
       Candidate Skills: ${skills.join(', ')}
       
@@ -128,6 +146,41 @@ export const analyzeSkillGap = async (skills: string[], targetRole: string): Pro
         return jsonMatch ? JSON.parse(jsonMatch[0]) : [];
     } catch (error) {
         console.error('Skill Gap Error:', error);
+        return [];
+    }
+};
+export const generateLearningRoadmap = async (jobTitle: string, missingSkills: string[]): Promise<any[]> => {
+    if (!GEMINI_API_KEY) return [
+        { title: 'Strategic Communication', status: 'Highly Recommended' },
+        { title: 'Project Coordination', status: 'Professional Growth' },
+        { title: 'Advanced Industry Tools', status: 'Essential Skill' },
+    ];
+
+    const prompt = `
+      Based on the job title "${jobTitle}" and the missing skills ${missingSkills.join(', ')}, 
+      generate 3 highly relevant learning roadmap items.
+      
+      Return ONLY a JSON array of objects with this structure matches lucide-react icons loosely:
+      [
+        { "title": "Course/Skill Name", "status": "Recommended/Essential", "modules": 5, "hours": 10 }
+      ]
+    `;
+
+    try {
+        const response = await fetch(GEMINI_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }]
+            })
+        });
+
+        const data = await response.json();
+        const resultText = data.candidates[0].content.parts[0].text.trim();
+        const jsonMatch = resultText.match(/\[.*\]/s);
+        return jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+    } catch (error) {
+        console.error('Roadmap Error:', error);
         return [];
     }
 };

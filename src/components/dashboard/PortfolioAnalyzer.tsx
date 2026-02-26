@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Globe, Github, Linkedin, ExternalLink, ShieldCheck, Cpu, Palette, BarChart, Zap, Search } from 'lucide-react';
+import { Globe, Linkedin, ExternalLink, ShieldCheck, Cpu, Palette, BarChart, Zap, Search } from 'lucide-react';
 import { Card, Badge } from '../ui';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -17,13 +17,13 @@ const PortfolioAnalyzer: React.FC = () => {
         setResults({
             strength: 88,
             metrics: [
-                { label: 'Project Quality', score: 92, icon: Cpu, color: 'text-blue-500', desc: 'Highly complex projects with clean code structure.' },
-                { label: 'UI/UX Design', score: 85, icon: Palette, color: 'text-pink-500', desc: 'Modern aesthetics with good responsive behavior.' },
-                { label: 'Tech Stack', score: 80, icon: Zap, color: 'text-amber-500', desc: 'Relevant modern stack (React, Tailwind, Node).' },
-                { label: 'Marketability', score: 95, icon: BarChart, color: 'text-emerald-500', desc: 'Excellent presentation for top-tier tech roles.' },
+                { label: 'Work Quality', score: 92, icon: Cpu, color: 'text-blue-500', desc: 'Highly complex samples with clear organizational structure.' },
+                { label: 'Presentation', score: 85, icon: Palette, color: 'text-pink-500', desc: 'Modern aesthetics with strong professional branding.' },
+                { label: 'Skill Depth', score: 80, icon: Zap, color: 'text-amber-500', desc: 'Relevant modern expertise and versatile skill set.' },
+                { label: 'Marketability', score: 95, icon: BarChart, color: 'text-emerald-500', desc: 'Excellent presentation for top-tier professional roles.' },
             ],
             suggestions: [
-                "Add a 'Live Demo' link for every project listed on GitHub.",
+                "Add clear descriptions for every major project or case study.",
                 "Include a detailed 'About Me' section to show personality.",
                 "Optimize images for better lighthouse performance scores.",
                 "List specific contributions if projects were collaborative."
@@ -38,7 +38,7 @@ const PortfolioAnalyzer: React.FC = () => {
                 <div>
                     <h1 className="text-3xl font-bold font-display tracking-tight">Portfolio <span className="gradient-text">AI Auditor</span></h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-1">
-                        Enter your GitHub or Personal Website URL for a deep technical audit.
+                        Enter your Portfolio, Case Study, or Professional Website URL for a deep audit.
                     </p>
                 </div>
             </div>
@@ -49,7 +49,7 @@ const PortfolioAnalyzer: React.FC = () => {
                         <Globe className="w-5 h-5 text-slate-400" />
                         <input
                             type="text"
-                            placeholder="https://github.com/username or yourportfolio.com"
+                            placeholder="your-portfolio-link.com or professional profile"
                             className="flex-1 bg-transparent border-none outline-none py-3 text-lg"
                             value={url}
                             onChange={(e) => setUrl(e.target.value)}
@@ -72,8 +72,8 @@ const PortfolioAnalyzer: React.FC = () => {
                     </button>
 
                     <div className="flex items-center justify-center gap-6 text-slate-400">
-                        <div className="flex items-center gap-2"><Github className="w-4 h-4" /> <span className="text-xs font-semibold">GitHub</span></div>
                         <div className="flex items-center gap-2"><Globe className="w-4 h-4" /> <span className="text-xs font-semibold">Websites</span></div>
+                        <div className="flex items-center gap-2"><ExternalLink className="w-4 h-4" /> <span className="text-xs font-semibold">Case Studies</span></div>
                         <div className="flex items-center gap-2"><Linkedin className="w-4 h-4" /> <span className="text-xs font-semibold">LinkedIn</span></div>
                     </div>
                 </div>
@@ -97,7 +97,7 @@ const PortfolioAnalyzer: React.FC = () => {
                             </div>
                         </div>
                         <h3 className="text-2xl font-bold font-display">Auditing Portfolio Experience...</h3>
-                        <p className="text-slate-500">Checking project complexity and code quality patterns</p>
+                        <p className="text-slate-500">Checking submission complexity and work quality patterns</p>
                     </motion.div>
                 )}
 
@@ -165,7 +165,7 @@ const PortfolioAnalyzer: React.FC = () => {
                                         </div>
                                         <div>
                                             <p className="text-sm font-bold">Industry Verified</p>
-                                            <p className="text-xs text-slate-500">Matches modern SaaS expectations</p>
+                                            <p className="text-xs text-slate-500">Matches modern professional expectations</p>
                                         </div>
                                     </div>
                                     <button className="text-primary-600 font-semibold text-sm flex items-center gap-1 hover:underline">

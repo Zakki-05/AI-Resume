@@ -4,15 +4,14 @@ import { Bell, Search, Moon, Sun, ChevronDown, Menu } from 'lucide-react';
 interface NavbarProps {
     darkMode: boolean;
     setDarkMode: (dark: boolean) => void;
-    user: {
-        name: string;
-        avatar: string;
-        role: string;
-    };
+    user: any;
     setMobileMenuOpen: (open: boolean) => void;
+    onSignIn: () => void;
+    onSignOut: () => void;
+    session: any;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ darkMode, setDarkMode, user, setMobileMenuOpen }) => {
+const Navbar: React.FC<NavbarProps> = ({ darkMode, setDarkMode, setMobileMenuOpen, onSignIn, session }) => {
     return (
         <header className="h-20 glass-card sticky top-0 z-40 px-4 sm:px-8 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
             {/* Mobile Menu Toggle */}
@@ -49,17 +48,26 @@ const Navbar: React.FC<NavbarProps> = ({ darkMode, setDarkMode, user, setMobileM
 
                 <div className="h-8 w-[1px] bg-slate-200 dark:bg-slate-800 mx-2"></div>
 
-                {/* User Profile */}
-                <button className="flex items-center gap-3 p-1.5 pl-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
-                    <div className="text-right hidden sm:block">
-                        <p className="text-sm font-semibold leading-none">{user.name}</p>
-                        <p className="text-xs text-slate-500 mt-1">{user.role}</p>
-                    </div>
-                    <div className="w-10 h-10 rounded-xl overflow-hidden bg-primary-100 ring-2 ring-primary-500/10">
-                        <img src={user.avatar} alt="User Avatar" className="w-full h-full object-cover" />
-                    </div>
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
-                </button>
+                {/* User Profile / Auth */}
+                {session ? (
+                    <button className="flex items-center gap-3 p-1.5 pl-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
+                        <div className="text-right hidden sm:block">
+                            <p className="text-sm font-semibold leading-none">{session.user.email?.split('@')[0]}</p>
+                            <p className="text-xs text-slate-500 mt-1">Free Tier</p>
+                        </div>
+                        <div className="w-10 h-10 rounded-xl overflow-hidden bg-primary-100 ring-2 ring-primary-500/10 flex items-center justify-center text-primary-600 font-bold">
+                            {session.user.email?.charAt(0).toUpperCase()}
+                        </div>
+                        <ChevronDown className="w-4 h-4 text-slate-400" />
+                    </button>
+                ) : (
+                    <button
+                        onClick={onSignIn}
+                        className="btn-primary py-2 px-6 rounded-xl font-bold flex items-center gap-2"
+                    >
+                        Sign In
+                    </button>
+                )}
             </div>
         </header>
     );

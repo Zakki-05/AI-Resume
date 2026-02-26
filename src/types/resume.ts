@@ -34,6 +34,7 @@ export interface Project {
 export interface ResumeData {
     id: string;
     updatedAt: string;
+    template: 'executive' | 'minimalist' | 'creative';
     personalInfo: PersonalInfo;
     experiences: Experience[];
     education: Education[];

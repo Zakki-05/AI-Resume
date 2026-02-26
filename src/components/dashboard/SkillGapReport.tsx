@@ -1,6 +1,6 @@
-import { Target, CheckCircle2, AlertCircle, ArrowRight, Layout, BookOpen, GitBranch, Loader2 } from 'lucide-react';
+import { Target, CheckCircle2, AlertCircle, ArrowRight, BookOpen, Loader2 } from 'lucide-react';
 import { Card, Badge } from '../ui';
-import { analyzeSkillGap } from '../../utils/aiService';
+import { analyzeSkillGap, generateLearningRoadmap } from '../../utils/aiService';
 import { useState, useEffect } from 'react';
 
 interface SkillGapReportProps {
@@ -10,6 +10,7 @@ interface SkillGapReportProps {
 
 const SkillGapReport: React.FC<SkillGapReportProps> = ({ skills, jobTitle }) => {
     const [missingSkills, setMissingSkills] = useState<string[]>([]);
+    const [roadmap, setRoadmap] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -19,6 +20,10 @@ const SkillGapReport: React.FC<SkillGapReportProps> = ({ skills, jobTitle }) => 
             try {
                 const gaps = await analyzeSkillGap(skills, jobTitle);
                 setMissingSkills(gaps);
+
+                // Fetch dynamic roadmap
+                const aiRoadmap = await generateLearningRoadmap(jobTitle, gaps);
+                setRoadmap(aiRoadmap);
             } catch (err) {
                 console.error(err);
             } finally {
@@ -39,11 +44,7 @@ const SkillGapReport: React.FC<SkillGapReportProps> = ({ skills, jobTitle }) => 
         }
     ];
 
-    const roadmap = [
-        { title: 'Data Structures & Algorithms', status: 'Highly Recommended', icon: GitBranch, color: 'text-rose-500' },
-        { title: 'System Design Fundamentals', status: 'Professional Growth', icon: Layout, color: 'text-indigo-500' },
-        { title: 'Cloud Deployment (AWS/Vercel)', status: 'Essential Skill', icon: BookOpen, color: 'text-emerald-500' },
-    ];
+
 
     return (
         <div className="space-y-8">
@@ -108,13 +109,14 @@ const SkillGapReport: React.FC<SkillGapReportProps> = ({ skills, jobTitle }) => 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {roadmap.map((item, i) => (
                         <Card key={i} className="group hover:border-primary-500/50 transition-all">
-                            <div className={`w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4 ${item.color}`}>
-                                <item.icon className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                            <div className={`w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4 ${i === 0 ? 'text-rose-500' : i === 1 ? 'text-indigo-500' : 'text-emerald-500'
+                                }`}>
+                                <BookOpen className="w-6 h-6 group-hover:scale-110 transition-transform" />
                             </div>
                             <h4 className="font-bold text-lg leading-tight">{item.title}</h4>
                             <p className="text-xs font-semibold text-primary-500 mt-2 uppercase tracking-wider">{item.status}</p>
                             <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500">
-                                8 modules • 15 hours
+                                {item.modules || 5} modules • {item.hours || 10} hours
                             </div>
                         </Card>
                     ))}
