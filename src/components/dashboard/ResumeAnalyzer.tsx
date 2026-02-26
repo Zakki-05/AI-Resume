@@ -11,6 +11,8 @@ const ResumeAnalyzer: React.FC = () => {
     const [analyzing, setAnalyzing] = useState(false);
     const [analysisStep, setAnalysisStep] = useState(0);
     const [results, setResults] = useState<any | null>(null);
+    const [targetRole, setTargetRole] = useState('');
+    const [targetTech, setTargetTech] = useState('');
 
     const steps = [
         "Parsing resume sections...",
@@ -57,15 +59,15 @@ const ResumeAnalyzer: React.FC = () => {
             const mockExtractedText = `This is a resume for a candidate named ${file.name.split('.')[0]}. 
             They are looking for a professional role and have listed several key industry certifications and relevant experience.`;
 
-            const aiResults = await analyzeATS(mockExtractedText);
+            const aiResults = await analyzeATS(mockExtractedText, targetRole, targetTech);
 
             if (aiResults) {
                 setResults({
-                    score: aiResults.score,
-                    skills: aiResults.detectedSkills,
-                    missingSkills: aiResults.missingSkills,
-                    suggestions: aiResults.suggestions,
-                    radarData: [] // TODO: Map AI results to Radar data structure
+                    score: aiResults.score || 0,
+                    skills: aiResults.skills || aiResults.detectedSkills || [],
+                    missingSkills: aiResults.missingSkills || [],
+                    suggestions: aiResults.suggestions || [],
+                    radarData: aiResults.radarData || []
                 });
             } else {
                 throw new Error("AI analysis failed");
@@ -110,7 +112,31 @@ const ResumeAnalyzer: React.FC = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95 }}
+                        className="space-y-6"
                     >
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2 text-left">
+                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Target Role (Optional)</label>
+                                <input
+                                    type="text"
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary-500 transition-all outline-none"
+                                    placeholder="e.g. Frontend Developer, Product Manager"
+                                    value={targetRole}
+                                    onChange={(e) => setTargetRole(e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2 text-left">
+                                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Target Tech/Skills (Optional)</label>
+                                <input
+                                    type="text"
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-primary-500 transition-all outline-none"
+                                    placeholder="e.g. React, TypeScript, Tailwind CSS"
+                                    value={targetTech}
+                                    onChange={(e) => setTargetTech(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
                         <div
                             onDragEnter={handleDrag}
                             onDragLeave={handleDrag}

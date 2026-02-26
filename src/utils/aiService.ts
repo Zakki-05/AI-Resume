@@ -30,7 +30,7 @@ export const improveBulletPoint = async (text: string): Promise<string> => {
     }
 };
 
-export const analyzeATS = async (resumeText: string): Promise<any> => {
+export const analyzeATS = async (resumeText: string, targetRole?: string, targetTech?: string): Promise<any> => {
     if (!GEMINI_API_KEY) return {
         score: 85,
         skills: ['Project Management', 'Team Leadership', 'Strategic Planning'],
@@ -47,7 +47,7 @@ export const analyzeATS = async (resumeText: string): Promise<any> => {
     };
 
     const prompt = `
-      Analyze this resume text and provide a professional ATS feedback report.
+      Analyze this resume text and provide a professional ATS feedback report specifically tailored for a candidate applying for the role of "${targetRole || 'Generic Professional'}" with a focus on the following technologies/skills: "${targetTech || 'General Industry Standards'}".
       
       Return ONLY a JSON object with the following structure:
       {
