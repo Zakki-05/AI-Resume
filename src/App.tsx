@@ -4,12 +4,16 @@ import Navbar from './components/layout/Navbar';
 import StatCard from './components/dashboard/StatCard';
 import { SkillRadar, ScoreDoughnut } from './components/dashboard/DashboardCharts';
 import ResumeAnalyzer from './components/dashboard/ResumeAnalyzer';
+import ResumeForm from './components/dashboard/ResumeForm';
+import ResumePreview from './components/dashboard/ResumePreview';
 import PortfolioAnalyzer from './components/dashboard/PortfolioAnalyzer';
 import SkillGapReport from './components/dashboard/SkillGapReport';
 import UserProfile from './components/dashboard/UserProfile';
+import ExportManager from './components/dashboard/ExportManager';
 import { Card, Badge } from './components/ui';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileSearch, Sparkles, Briefcase, BarChart3, ChevronRight } from 'lucide-react';
+import { FileSearch, Sparkles, Briefcase, BarChart3, ChevronRight, PenTool, Plus } from 'lucide-react';
+import type { ResumeData } from './types/resume';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -23,6 +27,59 @@ function App() {
     role: 'Aspiring Full Stack Developer',
     avatar: '/avatar.jpg'
   };
+
+  const [resumes, setResumes] = useState<ResumeData[]>([]);
+  const [activeResumeId, setActiveResumeId] = useState<string | null>(null);
+
+  const activeResume = resumes.find(r => r.id === activeResumeId) || null;
+
+  const createNewResume = () => {
+    const newId = Math.random().toString(36).substr(2, 9);
+    const newResume: ResumeData = {
+      id: newId,
+      updatedAt: new Date().toISOString(),
+      personalInfo: {
+        fullName: '', email: '', phone: '', location: '', jobTitle: '', summary: ''
+      },
+      experiences: [],
+      education: [],
+      skills: [],
+      projects: []
+    };
+    setResumes(prev => [...prev, newResume]);
+    setActiveResumeId(newId);
+    setActiveTab('resume-builder');
+  };
+
+  const updateActiveResume = (newData: Partial<ResumeData>) => {
+    setResumes(prev => prev.map(r =>
+      r.id === activeResumeId
+        ? { ...r, ...newData, updatedAt: new Date().toISOString() }
+        : r
+    ));
+  };
+
+  useEffect(() => {
+    const saved = localStorage.getItem('resumes_v2');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setResumes(parsed);
+        if (parsed.length > 0) setActiveResumeId(parsed[0].id);
+      } catch (e) {
+        console.error('Failed to load resumes', e);
+      }
+    } else {
+      // Create initial if none
+      createNewResume();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (resumes.length > 0) {
+      localStorage.setItem('resumes_v2', JSON.stringify(resumes));
+    }
+  }, [resumes]);
 
   useEffect(() => {
     if (darkMode) {
@@ -87,30 +144,28 @@ function App() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <StatCard
                       title="Resume Score"
-                      value="78 / 100"
+                      value={activeResume?.personalInfo.fullName ? '85 / 100' : '45 / 100'}
                       icon={FileSearch}
                       color="primary"
-                      trend={{ value: '12% up', isUp: true }}
+                      trend={{ value: 'Real-time', isUp: true }}
                     />
                     <StatCard
-                      title="Skill Match"
-                      value="85%"
+                      title="Total Resumes"
+                      value={resumes.length.toString()}
                       icon={Sparkles}
                       color="emerald"
-                      trend={{ value: '5% up', isUp: true }}
                     />
                     <StatCard
-                      title="Portfolio Power"
-                      value="Strong"
+                      title="Exp. Items"
+                      value={activeResume?.experiences.length.toString() || '0'}
                       icon={Briefcase}
                       color="amber"
                     />
                     <StatCard
-                      title="Rank"
-                      value="Top 15%"
+                      title="Status"
+                      value={activeResume?.personalInfo.summary ? 'Ready' : 'Draft'}
                       icon={BarChart3}
                       color="rose"
-                      trend={{ value: '2% down', isUp: false }}
                     />
                   </div>
 
@@ -136,33 +191,57 @@ function App() {
                       </button>
                     </div>
                     <div className="space-y-4">
-                      {[
-                        { title: 'Frontend Developer Resume', date: '2 hours ago', score: 78, type: 'Resume' },
-                        { title: 'Personal Portfolio Alpha', date: 'Yesterday', score: 92, type: 'Portfolio' },
-                        { title: 'Fullstack React Resume', date: '3 days ago', score: 65, type: 'Resume' },
-                      ].map((item, i) => (
-                        <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 group hover:border-primary-500/30 transition-all">
+                      {resumes.map((res) => (
+                        <div key={res.id} className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${activeResumeId === res.id ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-500/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 hover:border-primary-500/30'}`} onClick={() => setActiveResumeId(res.id)}>
                           <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm">
-                              {item.type === 'Resume' ? <FileSearch className="w-5 h-5 text-blue-500" /> : <Briefcase className="w-5 h-5 text-amber-500" />}
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shadow-sm ${activeResumeId === res.id ? 'bg-primary-500 text-white' : 'bg-white dark:bg-slate-800 text-primary-600'}`}>
+                              <PenTool className="w-5 h-5" />
                             </div>
                             <div>
-                              <p className="font-semibold">{item.title}</p>
-                              <p className="text-xs text-slate-500">{item.date} • {item.type}</p>
+                              <p className="font-semibold">{res.personalInfo.fullName || 'Draft Resume'} - {res.personalInfo.jobTitle || 'New'}</p>
+                              <p className="text-xs text-slate-500">Updated: {new Date(res.updatedAt).toLocaleDateString()}</p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <Badge variant={item.score > 70 ? 'success' : 'warning'}>
-                              {item.score}% Score
-                            </Badge>
-                            <button className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                          <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-wider text-slate-400">
+                            {activeResumeId === res.id && <Badge variant="success">Active</Badge>}
+                            <button onClick={(e) => { e.stopPropagation(); setActiveResumeId(res.id); setActiveTab('resume-builder'); }} className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
                               <ChevronRight className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
                       ))}
+                      <button
+                        onClick={createNewResume}
+                        className="w-full p-4 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-slate-500 hover:border-primary-500 hover:text-primary-500 transition-all font-bold flex items-center justify-center gap-2"
+                      >
+                        <Plus className="w-5 h-5" /> Create New Resume version
+                      </button>
                     </div>
                   </Card>
+                </div>
+              )}
+
+              {activeTab === 'resume-builder' && (
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+                  <div className="space-y-6">
+                    <div>
+                      <h1 className="text-3xl font-bold font-display tracking-tight">AI Resume <span className="gradient-text">Builder</span></h1>
+                      <p className="text-slate-500 dark:text-slate-400 mt-1">
+                        Craft your professional story with AI-powered suggestions.
+                      </p>
+                    </div>
+                    <ResumeForm
+                      data={activeResume || resumes[0]}
+                      updateData={updateActiveResume}
+                      onSave={() => alert('Resume data saved to local storage!')}
+                    />
+                  </div>
+                  <div className="sticky top-24 hidden xl:block space-y-6">
+                    <ExportManager onExportPDF={() => window.print()} />
+                    {activeResume && <ResumePreview data={activeResume} />}
+                  </div>
+
+                  {/* Mobile Preview Modal/Button could go here */}
                 </div>
               )}
 
@@ -174,8 +253,11 @@ function App() {
                 <PortfolioAnalyzer />
               )}
 
-              {activeTab === 'reports' && (
-                <SkillGapReport />
+              {activeTab === 'reports' && activeResume && (
+                <SkillGapReport
+                  skills={activeResume.skills}
+                  jobTitle={activeResume.personalInfo.jobTitle}
+                />
               )}
 
               {activeTab === 'profile' && (

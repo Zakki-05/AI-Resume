@@ -8,6 +8,7 @@ import {
     ChevronLeft,
     ChevronRight,
     Sparkles,
+    PenTool,
     X
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
@@ -30,6 +31,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, collapsed, setCollapsed, mobileMenuOpen, setMobileMenuOpen }) => {
     const navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'resume-builder', label: 'AI Builder', icon: PenTool },
         { id: 'resume-analyzer', label: 'Resume Analyzer', icon: FileSearch },
         { id: 'portfolio-analyzer', label: 'Portfolio AI', icon: Briefcase },
         { id: 'reports', label: 'Career Reports', icon: BarChart3 },

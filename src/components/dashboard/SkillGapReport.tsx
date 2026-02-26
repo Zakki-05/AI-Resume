@@ -1,30 +1,41 @@
-import { Target, CheckCircle2, AlertCircle, ArrowRight, Layout, BookOpen, GitBranch } from 'lucide-react';
+import { Target, CheckCircle2, AlertCircle, ArrowRight, Layout, BookOpen, GitBranch, Loader2 } from 'lucide-react';
 import { Card, Badge } from '../ui';
+import { analyzeSkillGap } from '../../utils/aiService';
+import { useState, useEffect } from 'react';
 
-const SkillGapReport: React.FC = () => {
+interface SkillGapReportProps {
+    skills: string[];
+    jobTitle: string;
+}
+
+const SkillGapReport: React.FC<SkillGapReportProps> = ({ skills, jobTitle }) => {
+    const [missingSkills, setMissingSkills] = useState<string[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchGap = async () => {
+            if (skills.length === 0 || !jobTitle) return;
+            setLoading(true);
+            try {
+                const gaps = await analyzeSkillGap(skills, jobTitle);
+                setMissingSkills(gaps);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchGap();
+    }, [skills, jobTitle]);
+
     const categories = [
         {
-            role: 'Full Stack Developer',
-            match: 75,
+            role: jobTitle || 'Target Role',
+            match: skills.length > 0 ? Math.min(Math.round((skills.length / (skills.length + missingSkills.length)) * 100), 100) : 0,
             skills: [
-                { name: 'React', status: 'mastered' },
-                { name: 'Node.js', status: 'mastered' },
-                { name: 'TypeScript', status: 'mastered' },
-                { name: 'Next.js', status: 'learning' },
-                { name: 'PostgreSQL', status: 'missing' },
-                { name: 'Redis', status: 'missing' },
-            ]
-        },
-        {
-            role: 'Frontend Architect',
-            match: 85,
-            skills: [
-                { name: 'React', status: 'mastered' },
-                { name: 'Tailwind CSS', status: 'mastered' },
-                { name: 'Design Systems', status: 'learning' },
-                { name: 'PWA', status: 'mastered' },
-                { name: 'Cypress', status: 'missing' },
-            ]
+                ...skills.map(s => ({ name: s, status: 'mastered' })),
+                ...missingSkills.map(s => ({ name: s, status: 'missing' }))
+            ].slice(0, 10) // Limit to 10 for UI
         }
     ];
 
@@ -43,8 +54,14 @@ const SkillGapReport: React.FC = () => {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {categories.map((cat, i) => (
+            <div className="grid grid-cols-1 gap-8">
+                {loading && (
+                    <div className="flex items-center justify-center p-12">
+                        <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
+                        <span className="ml-3 text-lg font-medium">Analyzing skill gaps...</span>
+                    </div>
+                )}
+                {!loading && categories.map((cat, i) => (
                     <Card key={i} className="relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/5 blur-3xl -mr-16 -mt-16 rounded-full" />
                         <div className="flex items-center justify-between mb-6">
